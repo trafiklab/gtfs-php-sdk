@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Trafiklab">
+    <!-- Lines can be N chars long (warnings), errors at M chars. 0 to disable. -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+</ruleset>
