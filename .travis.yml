@@ -8,6 +8,10 @@ install: composer install
 script:
 - composer test -- --coverage-clover=coverage.xml
 
+env:
+  global:
+    - LIMIT_MEMORY_USAGE=true
+
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 

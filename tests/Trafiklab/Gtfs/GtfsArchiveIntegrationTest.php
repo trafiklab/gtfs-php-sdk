@@ -76,11 +76,17 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetShapePoints()
     {
+        if (getenv("LIMIT_MEMORY_USAGE") != null) {
+            $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
+        }
         self::assertEquals(2172367, count($this->gtfsArchive->getShapePoints()));
     }
 
     public function testGetShape()
     {
+        if (getenv("LIMIT_MEMORY_USAGE") != null) {
+            $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
+        }
         $shape = $this->gtfsArchive->getShape(1);
 
         self::assertEquals(1236, count($shape));
