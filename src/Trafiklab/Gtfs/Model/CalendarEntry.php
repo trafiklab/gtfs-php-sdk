@@ -104,17 +104,17 @@ class CalendarEntry
     /**
      * @return DateTime
      */
-    public function getStartDate()
+    public function getStartDate(): DateTime
     {
-        return $this->start_date;
+        return DateTime::createFromFormat("Ymd", $this->start_date);
     }
 
     /**
      * @return DateTime
      */
-    public function getEndDate()
+    public function getEndDate(): DateTime
     {
-        return $this->end_date;
+        return DateTime::createFromFormat("Ymd", $this->end_date);
     }
 
 }

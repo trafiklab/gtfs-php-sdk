@@ -4,6 +4,8 @@
 namespace Trafiklab\Gtfs\Model;
 
 
+use DateTime;
+
 class CalendarDate
 {
 
@@ -33,9 +35,9 @@ class CalendarDate
     /**
      * @return mixed
      */
-    public function getDate()
+    public function getDate() : DateTime
     {
-        return $this->date;
+        return DateTime::createFromFormat("Ymd", $this->date);
     }
 
     /**

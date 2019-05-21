@@ -29,11 +29,10 @@ class GtfsArchive
     private const FEED_INFO_TXT = "feed_info.txt";
 
     private const TEMP_ROOT = "/tmp/gtfs/";
-    /**
-     * @var string
-     */
+
     private $fileRoot;
     private $_cache = [];
+    private $deleteUncompressedFilesWhenDone;
 
     private function __construct(string $fileRoot)
     {
@@ -249,17 +248,19 @@ class GtfsArchive
         $calendarDates = $this->getCalendarDates();
         $result = [];
         foreach ($calendarDates as $calendarDate) {
-            if ($calendarDate->getServiceId == $serviceId) {
+            if ($calendarDate->getServiceId() == $serviceId) {
                 $result[] = $calendarDate;
             }
         }
         return $result;
     }
 
-    public function delete()
+    public function deleteUncompressedFiles()
     {
-        echo 'Cleaning up resources...' . PHP_EOL;
         // Remove temporary data.
+        if (!file_exists($this->fileRoot)) {
+            return;
+        }
         $files = scandir($this->fileRoot);
         foreach ($files as $file) {
             if ($file != '.' && $file != '..') {
