@@ -93,6 +93,14 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
         self::assertEquals(56.666811, $shape[0]->getShapePtLat());
         self::assertEquals(16.318689, $shape[0]->getShapePtLon());
         for ($i = 0; $i < count($shape); $i++) {
+            self::assertEquals(1, $shape[$i]->getShapeId());
+            self::assertEquals($i + 1, $shape[$i]->getShapePtSequence());
+        }
+
+        $shape = $this->gtfsArchive->getShape(2185);
+        self::assertEquals(1191, count($shape));
+        for ($i = 0; $i < count($shape); $i++) {
+            self::assertEquals(2185, $shape[$i]->getShapeId());
             self::assertEquals($i + 1, $shape[$i]->getShapePtSequence());
         }
     }
@@ -126,5 +134,25 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
         self::assertEquals(5, $dates[0]->getServiceId());
         self::assertEquals(DateTime::createFromFormat("Ymd", 20190517), $dates[0]->getDate());
         self::assertEquals(1, $dates[0]->getExceptionType());
+    }
+
+    public function testGetTransfers()
+    {
+        $transfers = $this->gtfsArchive->getTransfers();
+        self::assertEquals(3476, count($transfers));
+        self::assertEquals("9021008001009000", $transfers[0]->getFromStopId());
+        self::assertEquals("9021008001009000", $transfers[0]->getToStopId());
+        self::assertEquals(2, $transfers[0]->getTransferType());
+        self::assertEquals(0, $transfers[0]->getMinTransferTime());
+    }
+
+    public function testGetFeedInfo()
+    {
+        $feedinfo = $this->gtfsArchive->getFeedInfo();
+        self::assertEquals(1, count($feedinfo));
+        self::assertEquals("Samtrafiken i Sverige AB", $feedinfo[0]->getFeedPublisherName());
+        self::assertEquals("https://www.samtrafiken.se", $feedinfo[0]->getFeedPublisherUrl());
+        self::assertEquals("2019-05-20", $feedinfo[0]->getFeedVersion());
+        self::assertEquals("sv", $feedinfo[0]->getFeedLang());
     }
 }

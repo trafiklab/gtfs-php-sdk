@@ -85,7 +85,8 @@ class FeedInfo
      */
     public function getFeedStartDate(): ?DateTime
     {
-        return $this->feed_start_date;
+        if ($this->feed_start_date == null) return null;
+        return DateTime::createFromFormat("Ymd", $this->feed_start_date);
     }
 
     /**
@@ -95,7 +96,8 @@ class FeedInfo
      */
     public function getFeedEndDate(): ?DateTime
     {
-        return $this->feed_end_date;
+        if ($this->feed_end_date == null) return null;
+        return DateTime::createFromFormat("Ymd", $this->feed_end_date);
     }
 
     /**

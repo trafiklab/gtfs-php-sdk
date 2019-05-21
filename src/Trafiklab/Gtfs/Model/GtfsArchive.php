@@ -111,7 +111,7 @@ class GtfsArchive
      */
     public function getAgencies(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::AGENCY_TXT, Agency::class, 'agency_id');
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::AGENCY_TXT, Agency::class, 'agency_id');
     }
 
     /**
@@ -119,7 +119,7 @@ class GtfsArchive
      */
     public function getStops(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::STOPS_TXT, Stop::class, 'stop_id');
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::STOPS_TXT, Stop::class, 'stop_id');
     }
 
     public function getStop(string $stopId)
@@ -136,7 +136,7 @@ class GtfsArchive
      */
     public function getTrips(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::TRIPS_TXT, Trip::class, 'trip_id');
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::TRIPS_TXT, Trip::class, 'trip_id');
     }
 
     public function getTrip(string $tripId)
@@ -153,7 +153,7 @@ class GtfsArchive
      */
     public function getRoutes(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::ROUTES_TXT, Route::class, 'route_id');
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::ROUTES_TXT, Route::class, 'route_id');
     }
 
     public function getRoute(string $routeId)
@@ -170,7 +170,7 @@ class GtfsArchive
      */
     public function getStopTimes(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::STOP_TIMES_TXT, StopTime::class);
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::STOP_TIMES_TXT, StopTime::class);
     }
 
     public function getStopTimesForTrip(string $tripId)
@@ -202,7 +202,10 @@ class GtfsArchive
      */
     public function getShapePoints(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::SHAPES_TXT, ShapePoint::class);
+        if ($this->getCachedResult(__METHOD__) == null) {
+            $this->setCachedResult(__METHOD__, $this->deserializeShapesCSV(self::SHAPES_TXT));
+        }
+        return $this->getCachedResult(__METHOD__);
     }
 
     /**
@@ -212,13 +215,19 @@ class GtfsArchive
      */
     public function getShape(string $shapeId): array
     {
-        $shapePoints = $this->getShapePoints();
-        $result = [];
-        foreach ($shapePoints as $shapePoint) {
-            if ($shapePoint->getShapeId() == $shapeId) {
-                $result[] = $shapePoint;
-            }
+        if ($this->getCachedResult(__METHOD__ . "::" . $shapeId) != null) {
+            return $this->getCachedResult(__METHOD__ . "::" . $shapeId);
         }
+
+        $shapePoints = $this->getShapePoints();
+        $i = $this->findIndexOfFirstFieldOccurrence($shapePoints, 'getShapeId', $shapeId);
+        $result = [];
+        while ($shapePoints[$i]->getShapeId() == $shapeId) {
+            $result[] = $shapePoints[$i];
+            $i++;
+        }
+
+        $this->setCachedResult(__METHOD__ . "::" . $shapeId, $result);
         return $result;
     }
 
@@ -227,7 +236,7 @@ class GtfsArchive
      */
     public function getCalendar(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::CALENDAR_TXT, CalendarEntry::class);
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::CALENDAR_TXT, CalendarEntry::class);
     }
 
     /**
@@ -235,7 +244,7 @@ class GtfsArchive
      */
     public function getCalendarDates(): array
     {
-        return $this->getCsvArrayThroughCache(__METHOD__, self::CALENDAR_DATES_TXT, CalendarDate::class);
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::CALENDAR_DATES_TXT, CalendarDate::class);
     }
 
     /**
@@ -253,6 +262,23 @@ class GtfsArchive
             }
         }
         return $result;
+    }
+
+    /**
+     * @return Transfer[]
+     */
+    public function getTransfers(): array
+    {
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::TRANSFERS_TXT, Transfer::class);
+    }
+
+
+    /**
+     * @return FeedInfo[]
+     */
+    public function getFeedInfo(): array
+    {
+        return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::FEED_INFO_TXT, FeedInfo::class);
     }
 
     public function deleteUncompressedFiles()
@@ -319,6 +345,78 @@ class GtfsArchive
     }
 
     /**
+     * This is a modified version of deserializeCSV, in order to optimize the speed when handling shapes
+     *
+     * @param         $csvPath    string File path leading to the CSV file.
+     *
+     * @return array the deserialized data, sorted by shape_id.
+     */
+    private function deserializeShapesCSV($csvPath): array
+    {
+        // Open the CSV file and read it into an associative array
+        $resultingObjects = $fieldNames = [];;
+
+        $handle = @fopen($this->fileRoot . $csvPath, "r");
+        if ($handle) {
+            while (($row = fgetcsv($handle)) !== false) {
+                // Read the header row
+                if (empty($fieldNames)) {
+                    $fieldNames = $row;
+                    continue;
+                }
+                // Read a data row
+                $rowData = [];
+                foreach ($row as $k => $value) {
+                    $rowData[$fieldNames[$k]] = $value;
+                }
+                $index = $rowData['shape_id'] . '-' . $rowData['shape_pt_sequence'];
+                $resultingObjects[$index] = new ShapePoint($this, $rowData);
+            }
+            if (!feof($handle)) {
+                throw new RuntimeException("Failed to read data from file");
+            }
+            fclose($handle);
+        }
+        return array_values($resultingObjects);
+    }
+
+    /**
+     * Find the index of the first ShapePoint for a given field value, by using binary search.
+     *
+     * @param $array     array The data to search through
+     * @param $getter    string The name of the getter for the field to search
+     * @param $value     string The value to search
+     *
+     * @return int
+     */
+    private function findIndexOfFirstFieldOccurrence(array $array, string $getter, string $value): int
+    {
+        return $this->doBinarySearch($array, $getter, $value, 0, count($array));
+    }
+
+    private function doBinarySearch(array $array, string $getter, string $value, int $start, int $stop)
+    {
+        if ($start == $stop) {
+            return $start;
+        }
+        $middle = $start + (($stop - $start) / 2);
+
+        if ($array[$middle]->$getter() > $value) {
+            return $this->doBinarySearch($array, $getter, $value, $start, $middle);
+        }
+
+        if ($array[$middle]->$getter() < $value) {
+            return $this->doBinarySearch($array, $getter, $value, $middle, $stop);
+        }
+
+        // If the value equals, we just loop back to the first match
+        while ($middle > 0 && $array[$middle - 1]->$getter() == $value) {
+            $middle--;
+        }
+        return $middle;
+    }
+
+    /**
      * Get a cached method result.
      *
      * @param string $method The method for which the cached result should be obtained.
@@ -352,12 +450,11 @@ class GtfsArchive
      *
      * @return mixed|null
      */
-    private function getCsvArrayThroughCache($method, $file, $class, $index = null)
+    private function loadCsvArrayToModelArrayThroughCache($method, $file, $class, $index = null)
     {
         if ($this->getCachedResult($method) == null) {
             $this->setCachedResult($method, $this->deserializeCSV($file, $class, $index));
         }
-        $a = $this->getCachedResult($method);
-        return $a;
+        return $this->getCachedResult($method);
     }
 }
