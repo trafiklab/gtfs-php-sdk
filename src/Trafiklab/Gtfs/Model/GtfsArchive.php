@@ -32,7 +32,6 @@ class GtfsArchive
 
     private $fileRoot;
     private $_cache = [];
-    private $deleteUncompressedFilesWhenDone;
 
     private function __construct(string $fileRoot)
     {
@@ -122,7 +121,12 @@ class GtfsArchive
         return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::STOPS_TXT, Stop::class, 'stop_id');
     }
 
-    public function getStop(string $stopId)
+    /**
+     * @param string $stopId
+     *
+     * @return null|Stop
+     */
+    public function getStop(string $stopId): ?Stop
     {
         $stops = $this->getStops();
         if (!key_exists($stopId, $stops)) {
@@ -139,7 +143,12 @@ class GtfsArchive
         return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::TRIPS_TXT, Trip::class, 'trip_id');
     }
 
-    public function getTrip(string $tripId)
+    /**
+     * @param string $tripId
+     *
+     * @return null|Trip
+     */
+    public function getTrip(string $tripId): ?Trip
     {
         $trips = $this->getTrips();
         if (!key_exists($tripId, $trips)) {
@@ -156,7 +165,10 @@ class GtfsArchive
         return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::ROUTES_TXT, Route::class, 'route_id');
     }
 
-    public function getRoute(string $routeId)
+    /**
+     * @return Route | null
+     */
+    public function getRoute(string $routeId): ?Route
     {
         $routes = $this->getRoutes();
         if (!key_exists($routeId, $routes)) {
@@ -173,7 +185,12 @@ class GtfsArchive
         return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::STOP_TIMES_TXT, StopTime::class);
     }
 
-    public function getStopTimesForTrip(string $tripId)
+    /**
+     * @param string $tripId
+     *
+     * @return StopTime[]
+     */
+    public function getStopTimesForTrip(string $tripId): array
     {
         $stopTimes = $this->getStopTimes();
         $result = [];
@@ -185,7 +202,12 @@ class GtfsArchive
         return $result;
     }
 
-    public function getStopTimesForStop(string $stopId)
+    /**
+     * @param string $stopId
+     *
+     * @return StopTime[]
+     */
+    public function getStopTimesForStop(string $stopId): array
     {
         $stopTimes = $this->getStopTimes();
         $result = [];
@@ -232,6 +254,8 @@ class GtfsArchive
     }
 
     /**
+     *  Get all calendar entries, defined in calendar.txt
+     *
      * @return CalendarEntry[]
      */
     public function getCalendar(): array
@@ -240,6 +264,8 @@ class GtfsArchive
     }
 
     /**
+     * Get all calendar dates, defined in calendar_dates.txt
+     *
      * @return CalendarDate[]
      */
     public function getCalendarDates(): array
@@ -248,6 +274,8 @@ class GtfsArchive
     }
 
     /**
+     * Get all the calendar dates where service_id matches the given serviceId parameter.
+     *
      * @param string $serviceId
      *
      * @return CalendarDate[]
@@ -265,6 +293,8 @@ class GtfsArchive
     }
 
     /**
+     * Get all transfers from transfers.txt.
+     *
      * @return Transfer[]
      */
     public function getTransfers(): array
@@ -281,6 +311,9 @@ class GtfsArchive
         return $this->loadCsvArrayToModelArrayThroughCache(__METHOD__, self::FEED_INFO_TXT, FeedInfo::class);
     }
 
+    /**
+     * Delete the uncompressed files. This should be done as a cleanup when you're ready.
+     */
     public function deleteUncompressedFiles()
     {
         // Remove temporary data.
