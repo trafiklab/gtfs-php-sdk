@@ -1,10 +1,11 @@
 <?php
 
 
-namespace Trafiklab\Gtfs\Model;
+namespace Trafiklab\Gtfs\Model\Entities;
 
 
 use DateTime;
+use Trafiklab\Gtfs\Model\GtfsArchive;
 
 class CalendarEntry
 {

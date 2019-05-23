@@ -10,6 +10,9 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 {
     private $gtfsArchive = null;
 
+    /**
+     * @throws \Exception
+     */
     public function __construct()
     {
         parent::__construct();
@@ -23,12 +26,12 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetStops()
     {
-        self::assertEquals(9375, count($this->gtfsArchive->getStops()));
+        self::assertEquals(9375, count($this->gtfsArchive->getStopsFile()->getStops()));
     }
 
     public function testGetStop()
     {
-        $stop = $this->gtfsArchive->getStop('9021008004033000');
+        $stop = $this->gtfsArchive->getStopsFile()->getStop('9021008004033000');
 
         self::assertEquals('Ottenby gård nedre', $stop->getStopName());
         self::assertEquals(56.232823, $stop->getStopLat());
@@ -38,12 +41,12 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetRoutes()
     {
-        self::assertEquals(337, count($this->gtfsArchive->getRoutes()));
+        self::assertEquals(337, count($this->gtfsArchive->getRoutesFile()->getRoutes()));
     }
 
     public function testGetRoute()
     {
-        $route = $this->gtfsArchive->getRoute('9011008095600000');
+        $route = $this->gtfsArchive->getRoutesFile()->getRoute('9011008095600000');
 
         self::assertEquals('9011008095600000', $route->getRouteId());
         self::assertEquals('88100000000001375', $route->getAgencyId());
@@ -54,12 +57,12 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetTrips()
     {
-        self::assertEquals(11967, count($this->gtfsArchive->getTrips()));
+        self::assertEquals(11967, count($this->gtfsArchive->getTripsFile()->getTrips()));
     }
 
     public function testGetTrip()
     {
-        $trip = $this->gtfsArchive->getTrip('88100000070093268');
+        $trip = $this->gtfsArchive->getTripsFile()->getTrip('88100000070093268');
 
         self::assertEquals('9011008003900000', $trip->getRouteId());
         self::assertEquals('13', $trip->getServiceId());
@@ -71,7 +74,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetStopTimes()
     {
-        self::assertEquals(248296, count($this->gtfsArchive->getStopTimes()));
+        self::assertEquals(248296, count($this->gtfsArchive->getStopTimesFile()->getStopTimes()));
     }
 
     public function testGetShapePoints()
@@ -79,7 +82,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
         if (getenv("LIMIT_MEMORY_USAGE") != null) {
             $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
         }
-        self::assertEquals(2172367, count($this->gtfsArchive->getShapePoints()));
+        self::assertEquals(2172367, count($this->gtfsArchive->getShapesFile()->getShapePoints()));
     }
 
     public function testGetShape()
@@ -87,7 +90,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
         if (getenv("LIMIT_MEMORY_USAGE") != null) {
             $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
         }
-        $shape = $this->gtfsArchive->getShape(1);
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(1);
 
         self::assertEquals(1236, count($shape));
         self::assertEquals(1, $shape[0]->getShapeId());
@@ -103,7 +106,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
             self::assertEquals($i + 1, $shape[$i]->getShapePtSequence());
         }
 
-        $shape = $this->gtfsArchive->getShape(2185);
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(2185);
         self::assertEquals(1191, count($shape));
         for ($i = 0; $i < count($shape); $i++) {
             self::assertEquals(2185, $shape[$i]->getShapeId());
@@ -113,7 +116,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetCalendar()
     {
-        $calendar = $this->gtfsArchive->getCalendar();
+        $calendar = $this->gtfsArchive->getCalendarFile()->getCalendarEntries();
         self::assertEquals(290, count($calendar));
         self::assertEquals(1, $calendar[0]->getServiceId());
         self::assertEquals(DateTime::createFromFormat("Ymd", "20190517"), $calendar[0]->getStartDate());
@@ -129,12 +132,12 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetCalendarDates()
     {
-        self::assertEquals(14965, count($this->gtfsArchive->getCalendarDates()));
+        self::assertEquals(14965, count($this->gtfsArchive->getCalendarDatesFile()->getCalendarDates()));
     }
 
     public function testGetCalendarDatesForService()
     {
-        $dates = $this->gtfsArchive->getCalendarDatesForService(5);
+        $dates = $this->gtfsArchive->getCalendarDatesFile()->getCalendarDatesForService(5);
         self::assertEquals(17, count($dates));
 
         self::assertEquals(5, $dates[0]->getServiceId());
@@ -144,7 +147,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetTransfers()
     {
-        $transfers = $this->gtfsArchive->getTransfers();
+        $transfers = $this->gtfsArchive->getTransfersFile()->getTransfers();
         self::assertEquals(3476, count($transfers));
         self::assertEquals("9021008001009000", $transfers[0]->getFromStopId());
         self::assertEquals("9021008001009000", $transfers[0]->getToStopId());
@@ -154,7 +157,7 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testGetFeedInfo()
     {
-        $feedinfo = $this->gtfsArchive->getFeedInfo();
+        $feedinfo = $this->gtfsArchive->getFeedInfoFile()->getFeedInfo();
         self::assertEquals(1, count($feedinfo));
         self::assertEquals("Samtrafiken i Sverige AB", $feedinfo[0]->getFeedPublisherName());
         self::assertEquals("https://www.samtrafiken.se", $feedinfo[0]->getFeedPublisherUrl());

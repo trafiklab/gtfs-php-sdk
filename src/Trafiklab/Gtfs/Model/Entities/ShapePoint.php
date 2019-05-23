@@ -1,8 +1,10 @@
 <?php
 
 
-namespace Trafiklab\Gtfs\Model;
+namespace Trafiklab\Gtfs\Model\Entities;
 
+
+use Trafiklab\Gtfs\Model\GtfsArchive;
 
 class ShapePoint
 {
