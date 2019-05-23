@@ -24,7 +24,7 @@ class GtfsStopTimesFile
             if (!key_exists($stopTime->getStopId(), $this->stopTimesByStop)) {
                 $this->stopTimesByStop[$stopTime->getStopId()] = [];
             }
-            $this->stopTimesByStop[$stopTime->getStopId()] = $stopTime;
+            $this->stopTimesByStop[$stopTime->getStopId()][] = $stopTime;
         }
     }
 
