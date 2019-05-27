@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Trafiklab\Gtfs\Util;
+namespace Trafiklab\Gtfs\Util\Internal;
 
 
 class BinarySearchUtil

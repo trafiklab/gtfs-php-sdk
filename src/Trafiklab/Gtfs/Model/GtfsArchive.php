@@ -15,7 +15,7 @@ use Trafiklab\Gtfs\Model\Files\GtfsStopsFile;
 use Trafiklab\Gtfs\Model\Files\GtfsStopTimesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsTransfersFile;
 use Trafiklab\Gtfs\Model\Files\GtfsTripsFile;
-use Trafiklab\Gtfs\Util\ArrayCache;
+use Trafiklab\Gtfs\Util\Internal\ArrayCache;
 use ZipArchive;
 
 class GtfsArchive

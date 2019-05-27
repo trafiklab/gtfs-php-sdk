@@ -38,31 +38,31 @@ class Trip
     }
 
     /**
-     *    Identifies a route.
+     * Identifies a route.
      *
-     * @return mixed
+     * @return string
      */
-    public function getRouteId()
+    public function getRouteId(): string
     {
         return $this->route_id;
     }
 
     /**
-     *    Identifies a set of dates when service is available for one or more routes.
+     * Identifies a set of dates when service is available for one or more routes.
      *
-     * @return mixed
+     * @return string
      */
-    public function getServiceId()
+    public function getServiceId(): string
     {
         return $this->service_id;
     }
 
     /**
-     *    Identifies a trip.
+     * Identifies a trip.
      *
-     * @return mixed
+     * @return string
      */
-    public function getTripId()
+    public function getTripId(): string
     {
         return $this->trip_id;
     }
@@ -74,9 +74,9 @@ class Trip
      * If the headsign changes during a trip, you can override the trip_headsign with values from the stop_headsign
      * field in stop_times.txt.
      *
-     * @return mixed
+     * @return string | null
      */
-    public function getTripHeadsign()
+    public function getTripHeadsign(): ?string
     {
         return $this->trip_headsign;
     }
@@ -88,9 +88,9 @@ class Trip
      * If a trip_short_name is provided, it needs to uniquely identify a trip within a service day. Don't use it for
      * destination names or limited/express designations.
      *
-     * @return mixed
+     * @return  string | null
      */
-    public function getTripShortName()
+    public function getTripShortName(): ?string
     {
         return $this->trip_short_name;
     }
@@ -105,9 +105,9 @@ class Trip
      * This field isn't used in routing, but instead provides a way to separate trips by direction when you publish
      * time tables. You can specify names for each direction with the trip_headsign field.
      *
-     * @return mixed
+     * @return  int | null
      */
-    public function getDirectionId()
+    public function getDirectionId(): ?int
     {
         return $this->direction_id;
     }
@@ -118,9 +118,9 @@ class Trip
      * block_id can include trips with different service days, which then makes distinct blocks. For more details, see
      * Blocks and service days example.
      *
-     * @return mixed
+     * @return  string | null
      */
-    public function getBlockId()
+    public function getBlockId(): ?string
     {
         return $this->block_id;
     }
@@ -128,9 +128,9 @@ class Trip
     /**
      * Defines a geospatial shape that describes the vehicle travel for a trip.
      *
-     * @return mixed
+     * @return  string | null
      */
-    public function getShapeId()
+    public function getShapeId(): ?string
     {
         return $this->shape_id;
     }
@@ -143,9 +143,9 @@ class Trip
      * 1: The vehicle used on this particular trip can accommodate at least one rider in a wheelchair.
      * 2: No riders in wheelchairs can be accommodated on this trip.
      *
-     * @return mixed
+     * @return  int | null
      */
-    public function getWheelchairAccessible()
+    public function getWheelchairAccessible(): ?int
     {
         return $this->wheelchair_accessible;
     }
@@ -157,9 +157,9 @@ class Trip
      * 1: The vehicle used on this particular trip can accommodate at least one bicycle.
      * 2: No bicycles are allowed on this trip.
      *
-     * @return mixed
+     * @return int | null
      */
-    public function getBikesAllowed()
+    public function getBikesAllowed(): ?int
     {
         return $this->bikes_allowed;
     }

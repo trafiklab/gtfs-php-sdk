@@ -40,9 +40,9 @@ class StopTime
     /**
      * Identifies a trip.
      *
-     * @return mixed
+     * @return string
      */
-    public function getTripId()
+    public function getTripId(): string
     {
         return $this->trip_id;
     }
@@ -57,9 +57,9 @@ class StopTime
      * For information on how to enter arrival times for stops where the vehicle strictly adheres to a schedule, see
      * Timepoints.
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getArrivalTime()
+    public function getArrivalTime(): ?string
     {
         return $this->arrival_time;
     }
@@ -75,9 +75,9 @@ class StopTime
      * For information on how to enter departure times for stops where the vehicle strictly adheres to a schedule, see
      * Timepoints.
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getDepartureTime()
+    public function getDepartureTime(): ?string
     {
         return $this->departure_time;
     }
@@ -90,9 +90,9 @@ class StopTime
      * should have stop_id=1 in all subsequent data updates. If a stop isn't a timepoint, enter blank values for
      * arrival_time and departure_time. For more details, see Timepoints.
      *
-     * @return mixed
+     * @return string
      */
-    public function getStopId()
+    public function getStopId(): string
     {
         return $this->stop_id;
     }
@@ -104,9 +104,9 @@ class StopTime
      * For example, the first stop on the trip could have a stop_sequence of 1, the second stop on the trip could have
      * a stop_sequence of 23, the third stop could have a stop_sequence of 40, and so on.
      *
-     * @return mixed
+     * @return int|null
      */
-    public function getStopSequence()
+    public function getStopSequence(): ?int
     {
         return $this->stop_sequence;
     }
@@ -116,9 +116,9 @@ class StopTime
      * override the default trip_headsign when the headsign changes between stops. If this headsign is associated with
      * an entire trip, use trip_headsign instead.
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getStopHeadsign()
+    public function getStopHeadsign(): ?string
     {
         return $this->stop_headsign;
     }
@@ -133,9 +133,9 @@ class StopTime
      * 2: Must phone agency to arrange pickup
      * 3: Must coordinate with driver to arrange pickup
      *
-     * @return mixed
+     * @return int|null
      */
-    public function getPickupType()
+    public function getPickupType(): ?int
     {
         return $this->pickup_type;
     }
@@ -150,9 +150,9 @@ class StopTime
      * 2: Must phone agency to arrange dropoff
      * 3: Must coordinate with driver to arrange dropoff
      *
-     * @return mixed
+     * @return int|null
      */
-    public function getDropOffType()
+    public function getDropOffType(): ?int
     {
         return $this->drop_off_type;
     }
@@ -170,9 +170,9 @@ class StopTime
      * reverse travel along a route. The units used for shape_dist_traveled in the stop_times.txt file must match the
      * units that are used for this field in the shapes.txt file.
      *
-     * @return mixed
+     * @return float|null
      */
-    public function getShapeDistTraveled()
+    public function getShapeDistTraveled(): ?float
     {
         return $this->shape_dist_traveled;
     }
@@ -193,9 +193,9 @@ class StopTime
      * timepoint=0), but it's an error to mark an entry as a timepoint (with timepoint=1) without specifying arrival
      * and departure times.
      *
-     * @return mixed
+     * @return int|null
      */
-    public function getTimepoint()
+    public function getTimepoint(): ?int
     {
         return $this->timepoint;
     }

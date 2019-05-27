@@ -6,9 +6,9 @@ namespace Trafiklab\Gtfs\Model\Files;
 
 use Trafiklab\Gtfs\Model\Entities\ShapePoint;
 use Trafiklab\Gtfs\Model\GtfsArchive;
-use Trafiklab\Gtfs\Util\ArrayCache;
-use Trafiklab\Gtfs\Util\BinarySearchUtil;
-use Trafiklab\Gtfs\Util\GtfsParserUtil;
+use Trafiklab\Gtfs\Util\Internal\ArrayCache;
+use Trafiklab\Gtfs\Util\Internal\BinarySearchUtil;
+use Trafiklab\Gtfs\Util\Internal\GtfsParserUtil;
 
 class GtfsShapesFile
 {

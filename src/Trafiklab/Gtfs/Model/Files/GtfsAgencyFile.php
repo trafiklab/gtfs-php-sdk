@@ -5,7 +5,7 @@ namespace Trafiklab\Gtfs\Model\Files;
 
 use Trafiklab\Gtfs\Model\Entities\Agency;
 use Trafiklab\Gtfs\Model\GtfsArchive;
-use Trafiklab\Gtfs\Util\GtfsParserUtil;
+use Trafiklab\Gtfs\Util\Internal\GtfsParserUtil;
 
 class GtfsAgencyFile
 {
