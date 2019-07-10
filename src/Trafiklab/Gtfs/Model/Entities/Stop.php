@@ -28,7 +28,7 @@ class Stop
      * Stop constructor.
      *
      * @param GtfsArchive $archive The archive in which this data originates, used to link between files.
-     * @param array       $data    An associative array containing the variable values.
+     * @param array $data An associative array containing the variable values.
      *
      * @internal Not to be used outside of the Trafiklab\Gtfs\Model package.
      */
@@ -110,7 +110,7 @@ class Stop
      */
     public function getStopLat(): ?float
     {
-        return $this->stop_lat;
+        return floatval($this->stop_lat);
     }
 
     /**
@@ -126,7 +126,7 @@ class Stop
      */
     public function getStopLon(): ?float
     {
-        return $this->stop_lon;
+        return floatval($this->stop_lon);
     }
 
     /**
@@ -222,9 +222,12 @@ class Stop
      *
      * @return int | null
      */
-    public function getLocationType(): int
+    public function getLocationType(): ?int
     {
-        return $this->location_type;
+        if ($this->location_type == null){
+            return null;
+        }
+        return intval($this->location_type);
     }
 
     /**
