@@ -13,8 +13,11 @@ class GtfsAgencyFile
 
     public function __construct(GtfsArchive $parent, string $filePath)
     {
-        $this->dataRows = GtfsParserUtil::deserializeCSV($parent, $filePath,
-            Agency::class, 'trip_id');
+        $this->dataRows = GtfsParserUtil::deserializeCSV(
+            $parent,
+            $filePath,
+            Agency::class
+        );
     }
 
     /**
