@@ -3,7 +3,7 @@
 namespace Trafiklab\Gtfs\Model\Files;
 
 
-use Trafiklab\Gtfs\Model\Entities\FeedInfo;
+use Trafiklab\Gtfs\Model\Entities\Frequency;
 use Trafiklab\Gtfs\Model\GtfsArchive;
 use Trafiklab\Gtfs\Util\Internal\GtfsParserUtil;
 
