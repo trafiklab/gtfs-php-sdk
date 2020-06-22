@@ -255,7 +255,7 @@ class Stop
      *
      * @return int | null
      */
-    public function getWheelchairBoarding(): int
+    public function getWheelchairBoarding(): ?int
     {
         return $this->wheelchair_boarding;
     }
