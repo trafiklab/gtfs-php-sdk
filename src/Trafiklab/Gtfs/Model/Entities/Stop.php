@@ -20,6 +20,7 @@ class Stop
     private $parent_station;
     private $stop_timezone;
     private $wheelchair_boarding;
+    private $level_id;
     private $platform_code;
 
     private $archive;
@@ -224,7 +225,7 @@ class Stop
      */
     public function getLocationType(): ?int
     {
-        if ($this->location_type == null){
+        if ($this->location_type == null) {
             return null;
         }
         return intval($this->location_type);
@@ -257,5 +258,15 @@ class Stop
     public function getWheelchairBoarding(): int
     {
         return $this->wheelchair_boarding;
+    }
+
+    /**
+     * Level of the location. The same level can be used by multiple unlinked stations.
+     *
+     * @return string | null
+     */
+    public function getLevelId(): ?string
+    {
+        return $this->level_id;
     }
 }
