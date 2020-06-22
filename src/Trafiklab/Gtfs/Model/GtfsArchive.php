@@ -200,7 +200,7 @@ class GtfsArchive
      */
     public function getFrequenciesFile(): GtfsFrequenciesFile
     {
-        return $this->loadGtfsFileThroughCache(__METHOD__, self::TRIPS_TXT, GtfsFrequenciesFile::class);
+        return $this->loadGtfsFileThroughCache(__METHOD__, self::FREQUENCIES_TXT, GtfsFrequenciesFile::class);
     }
 
     /**
