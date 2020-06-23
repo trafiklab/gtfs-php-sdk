@@ -164,4 +164,15 @@ class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
         self::assertEquals("2019-05-20", $feedinfo[0]->getFeedVersion());
         self::assertEquals("sv", $feedinfo[0]->getFeedLang());
     }
+
+    public function testGetAgency()
+    {
+        $agencies = $this->gtfsArchive->getAgencyFile()->getAgencies();
+        self::assertEquals(1, count($agencies));
+        self::assertEquals(88100000000001375, $agencies[0]->getAgencyId());
+        self::assertEquals("Kalmar Länstrafik", $agencies[0]->getAgencyName());
+        self::assertEquals("https://www.resrobot.se/", $agencies[0]->getAgencyUrl());
+        self::assertEquals("Europe/Stockholm", $agencies[0]->getAgencyTimezone());
+        self::assertEquals("sv", $agencies[0]->getAgencyLang());
+    }
 }

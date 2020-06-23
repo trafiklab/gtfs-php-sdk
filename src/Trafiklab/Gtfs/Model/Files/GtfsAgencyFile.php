@@ -25,7 +25,7 @@ class GtfsAgencyFile
      *
      * @return Agency[]
      */
-    public function getData(): array
+    public function getAgencies(): array
     {
         return $this->dataRows;
     }
