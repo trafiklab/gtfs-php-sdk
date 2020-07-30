@@ -19,6 +19,8 @@ class StopTime
     private $drop_off_type;
     private $shape_dist_traveled;
     private $timepoint;
+    private $continuous_pickup;
+    private $continuous_drop_off;
     private $archive;
 
     /**
@@ -174,7 +176,7 @@ class StopTime
      */
     public function getShapeDistTraveled(): ?float
     {
-        return $this->shape_dist_traveled;
+        return ((string) $this->shape_dist_traveled) != '' ? $this->shape_dist_traveled : null;
     }
 
     /**
@@ -198,5 +200,38 @@ class StopTime
     public function getTimepoint(): ?int
     {
         return $this->timepoint;
+    }
+
+    /**
+     * Indicates whether a rider can board the transit vehicle at any point along the vehicle’s travel path. The path is described by shapes.txt, from this stop_time to the next stop_time in the trip’s stop_sequence. Valid options are:
+     * 
+     * 0 - Continuous stopping pickup.
+     * 1 or empty - No continuous stopping pickup.
+     * 2 - Must phone an agency to arrange continuous pickup.
+     * 3 - Must coordinate with a driver to arrange continuous stopping pickup.
+     * 
+     * The continuous pickup behavior indicated in stop_times.txt overrides any behavior defined in routes.txt.
+     * 
+     * @return int|null
+     */
+    public function getContinuousPickup(): ?int
+    {
+        return $this->continuous_pickup;
+    }
+
+    /**
+     * Indicates whether a rider can alight from the transit vehicle at any point along the vehicle’s travel path as described by shapes.txt, from this stop_time to the next stop_time in the trip’s stop_sequence.
+     * 
+     * 0 - Continuous stopping drop off.
+     * 1 or empty - No continuous stopping drop off.
+     * 2 - Must phone an agency to arrange continuous drop off.
+     * 3 - Must coordinate with a driver to arrange continuous stopping drop off.
+     * 
+     * The continuous drop-off behavior indicated in stop_times.txt overrides any behavior defined in routes.txt.
+     * @return int|null
+     */
+    public function getContinuousDropOff(): ?int
+    {
+        return $this->continuous_drop_off;
     }
 }

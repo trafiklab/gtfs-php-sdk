@@ -19,6 +19,8 @@ class Route
     private $route_color;
     private $route_text_color;
     private $route_sort_order;
+    private $continuous_pickup;
+    private $continuous_drop_off;
     private $archive;
 
     /**
@@ -170,5 +172,39 @@ class Route
     public function getRouteSortOrder(): ?int
     {
         return $this->route_sort_order;
+    }
+
+    /**
+     * Indicates whether a rider can board the transit vehicle anywhere along the vehicle’s travel path. The path is described by shapes.txt on every trip of the route. Valid options are:
+     *
+     * 0 - Continuous stopping pickup.
+     * 1 or empty - No continuous stopping pickup.
+     * 2 - Must phone an agency to arrange continuous stopping pickup.
+     * 3 - Must coordinate with a driver to arrange continuous stopping pickup.
+     *
+     * The default continuous pickup behavior defined in routes.txt can be overridden in stop_times.txt.
+     *
+     * @return int | null
+     */
+    public function getContinuousPickup(): ?int
+    {
+        return $this->continuous_pickup;
+    }
+
+    /**
+     * Indicates whether a rider can alight from the transit vehicle at any point along the vehicle’s travel path. The path is described by shapes.txt on every trip of the route. Valid options are:
+     *
+     * 0- Continuous stopping drop-off.
+     * 1 or empty - No continuous stopping drop-off.
+     * 2 - Must phone an agency to arrange continuous stopping drop-off.
+     * 3 - Must coordinate with a driver to arrange continuous stopping drop-off.
+     * 
+     * The default continuous drop-off behavior defined in routes.txt can be overridden in stop_times.txt.
+     *
+     * @return int | null
+     */
+    public function getContinuousDropOff(): ?int
+    {
+        return $this->continuous_drop_off;
     }
 }

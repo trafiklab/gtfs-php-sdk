@@ -9,6 +9,7 @@ use Trafiklab\Gtfs\Model\Files\GtfsAgencyFile;
 use Trafiklab\Gtfs\Model\Files\GtfsCalendarDatesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsCalendarFile;
 use Trafiklab\Gtfs\Model\Files\GtfsFeedInfoFile;
+use Trafiklab\Gtfs\Model\Files\GtfsFrequenciesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsRoutesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsShapesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsStopsFile;
@@ -192,6 +193,14 @@ class GtfsArchive
     public function getTripsFile(): GtfsTripsFile
     {
         return $this->loadGtfsFileThroughCache(__METHOD__, self::TRIPS_TXT, GtfsTripsFile::class);
+    }
+
+    /**
+     * @return GtfsFrequenciesFile
+     */
+    public function getFrequenciesFile(): GtfsFrequenciesFile
+    {
+        return $this->loadGtfsFileThroughCache(__METHOD__, self::FREQUENCIES_TXT, GtfsFrequenciesFile::class);
     }
 
     /**

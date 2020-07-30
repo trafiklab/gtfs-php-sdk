@@ -88,6 +88,6 @@ class ShapePoint
      */
     public function getShapeDistTraveled(): ?float
     {
-        return $this->shape_dist_traveled;
+        return ((string) $this->shape_dist_traveled) != '' ? $this->shape_dist_traveled : null;
     }
 }
