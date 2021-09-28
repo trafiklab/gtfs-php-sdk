@@ -3,10 +3,10 @@
 namespace Trafiklab\Gtfs;
 
 use DateTime;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Trafiklab\Gtfs\Model\GtfsArchive;
 
-class GtfsArchiveIntegrationTest extends PHPUnit_Framework_TestCase
+class GtfsArchiveIntegrationTest extends TestCase
 {
     private $gtfsArchive = null;
 
