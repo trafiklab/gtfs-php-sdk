@@ -31,6 +31,7 @@ class GtfsParserUtil
         $handle = self::openFile($csvPath);
         if ($handle) {
             while (($row = fgetcsv($handle)) !== false) {
+                $row = array_map('trim', $row);
                 // Read the header row
                 if (empty($fieldNames)) {
                     $fieldNames = $row;
@@ -71,6 +72,7 @@ class GtfsParserUtil
         $handle = self::openFile($csvPath);
         if ($handle) {
             while (($row = fgetcsv($handle)) !== false) {
+                $row = array_map('trim', $row);
                 // Read the header row
                 if (empty($fieldNames)) {
                     $fieldNames = $row;
@@ -92,21 +94,21 @@ class GtfsParserUtil
         return $resultingObjects;
     }
 
-	/**
-	 * Opens a file and removes BOM if present
-	 *
-	 * @param string $path
-	 *
-	 * @return false|resource resource for the opened file or false
-	 */
-	private static function openFile(string $path)
-	{
-		$handle = @fopen($path, "r");
-		// exclude BOM
-		if ($handle && (fgets($handle, 4) !== "\xef\xbb\xbf")) {
-			rewind($handle);
-		}
-		return $handle;
+    /**
+     * Opens a file and removes BOM if present
+     *
+     * @param string $path
+     *
+     * @return false|resource resource for the opened file or false
+     */
+    private static function openFile(string $path)
+    {
+        $handle = @fopen($path, "r");
+        // exclude BOM
+        if ($handle && (fgets($handle, 4) !== "\xef\xbb\xbf")) {
+            rewind($handle);
+        }
+        return $handle;
     }
 
 }
