@@ -119,7 +119,6 @@ class GtfsArchive
                  * Track the Status code to determine if the file has changed, or exists.
                  */
                 $statusCode = $responseHeaders['Status'];
-
                 switch ($statusCode) {
                     case 200:
                         /**
@@ -129,8 +128,14 @@ class GtfsArchive
                         self::$archiveLastModified = $responseHeaders['Last-Modified'] ?? null;
                         self::$archiveETag = $responseHeaders['ETag'] ?? null;
 
-                        /** If no last-modified date is present, and Etag is present and matches, skip as it's not modified */
-                        if ($eTag !== null && self::$archiveETag !== null && $eTag == self::$archiveETag) {
+                        /** If no last-modified date is present, and Etag is present and matches, skip as it's not modified
+                         *  If it returns 200 and LastModified is not null, that means that the Last-Modified date has changed.
+                         *  Should always respect the Last-Modified date over eTag if there's a mismatch.
+                         */
+                        if (
+                            ($lastModified === null) &&
+                            ($eTag !== null && self::$archiveETag !== null && $eTag == self::$archiveETag)
+                        ) {
                             return null;
                         } else {
                             /**
