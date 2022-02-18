@@ -76,7 +76,6 @@ class GtfsArchive
      */
     private static function createRequestContext(?\DateTime $lastModified = null)
     {
-        /** @var string $lastModifiedString */
         self::$archiveLastModified = $lastModified !== null ? self::getLastModifiedFromDateTime($lastModified) : '';
         return stream_context_create([
             'http' => [
