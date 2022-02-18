@@ -340,18 +340,23 @@ class GtfsArchive
         return $this->getCachedResult($method);
     }
 
-    private static function parseHeaders( array $headers ): array
+    /**
+     * Parse file_get_contents Response headers into an array
+     * Primarily to retrieve the Status Code, Last-Modified, and ETag headers.
+     * @param array $headers
+     * @return array
+     */
+    private static function parseHeaders(array $headers): array
     {
         $headersArray = [];
-        foreach( $headers as $k => $v )
-        {
-            $t = explode( ':', $v, 2 );
-            if( isset( $t[1] ) )
+        foreach($headers as $k => $v) {
+            $t = explode(':', $v, 2);
+            if (isset($t[1])) {
                 $headersArray[ trim($t[0]) ] = trim( $t[1] );
-            else
-            {
+            }
+            else {
                 $headersArray[] = $v;
-                if( preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$v, $out ) )
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $v, $out) )
                     $headersArray['Status'] = intval($out[1]);
             }
         }
