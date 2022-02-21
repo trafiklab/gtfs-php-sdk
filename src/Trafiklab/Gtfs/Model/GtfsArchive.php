@@ -87,6 +87,16 @@ class GtfsArchive
     }
 
     /**
+     * Check if the temp directory exists, if not create it.
+     */
+    private static function makeTempDir()
+    {
+        if (!file_exists(self::TEMP_ROOT)) {
+            mkdir(self::TEMP_ROOT, 0777, true);
+        }
+    }
+
+    /**
      * Only create a new Archive if it has been modified since the last PULL
      * We delete the Zip archive after each cycle as this is meant to constantly check headers.
      * @param string $url
@@ -105,6 +115,8 @@ class GtfsArchive
             try {
                 /** Create the Request Context (Returns Stream Context) */
                 $context = self::createRequestContext($lastModified);
+                /** Make the temp directory if it doesn't exist. */
+                self::makeTempDir();
 
                 /** Download the zip file if it's been modified, or exists. */
                 file_put_contents($temp_file, file_get_contents($url, false, $context));
@@ -118,15 +130,15 @@ class GtfsArchive
                 /** @var integer $statusCode
                  * Track the Status code to determine if the file has changed, or exists.
                  */
-                $statusCode = $responseHeaders['Status'];
+                $statusCode = $responseHeaders['status'];
                 switch ($statusCode) {
                     case 200:
                         /**
                          * If the Status Code is 200, that means the file has been modified or it is a new GTFS Source.
                          * Track the eTag and Last-Modified headers if they exist.
                          */
-                        self::$archiveLastModified = $responseHeaders['Last-Modified'] ?? null;
-                        self::$archiveETag = $responseHeaders['ETag'] ?? null;
+                        self::$archiveLastModified = $responseHeaders['last-modified'] ?? null;
+                        self::$archiveETag = $responseHeaders['etag'] ?? null;
 
                         /** If no last-modified date is present, and Etag is present and matches, skip as it's not modified
                          *  If it returns 200 and LastModified is not null, that means that the Last-Modified date has changed.
@@ -155,7 +167,8 @@ class GtfsArchive
                 }
             } catch (Exception $exception) {
                 throw new Exception(
-                    "There was an issue downloading the GTFS from the requested URL: {$url}, Error: {$exception->getMessage()}"
+                    "There was an issue downloading the GTFS from the requested URL: {$url}, Error: " .
+                    $exception->getMessage()
                 );
             } finally {
                 /** Clean up - Delete the Downloaded Zip if it exists. */
@@ -356,12 +369,12 @@ class GtfsArchive
         foreach($headers as $k => $v) {
             $t = explode(':', $v, 2);
             if (isset($t[1])) {
-                $headersArray[ trim($t[0]) ] = trim( $t[1] );
+                $headersArray[ strtolower(trim($t[0])) ] = trim( $t[1] );
             }
             else {
                 $headersArray[] = $v;
                 if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $v, $out) )
-                    $headersArray['Status'] = intval($out[1]);
+                    $headersArray['status'] = intval($out[1]);
             }
         }
         return $headersArray;
