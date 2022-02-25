@@ -168,7 +168,7 @@ class GtfsArchive
             } catch (Exception $exception) {
                 throw new Exception(
                     "There was an issue downloading the GTFS from the requested URL: {$url}, Error: " .
-                    $exception->getMessage()
+                    $exception->getMessage(), $statusCode ?? 0
                 );
             } finally {
                 /** Clean up - Delete the Downloaded Zip if it exists. */
@@ -333,8 +333,15 @@ class GtfsArchive
         $files = scandir($this->fileRoot);
         foreach ($files as $file) {
             if ($file != '.' && $file != '..') {
-                // Remove all extracted files from the zip file.
-                unlink($this->fileRoot . '/' . $file);
+                $path = $this->fileRoot . DIRECTORY_SEPARATOR . $file;
+                /** Check for OS Specific directories that could've been added. Ex: _MACOSX/ */
+                if (is_dir($path)) {
+                    rmdir($path);
+                } else {
+                    // Remove all extracted files from the zip file.
+                    unlink($path);
+                }
+
             }
         }
         reset($files);
