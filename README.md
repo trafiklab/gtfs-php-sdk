@@ -23,6 +23,43 @@ $gtfsArchive = GtfsArchive::createFromPath("gtfs.zip");
 $gtfsArchive = GtfsArchive::createFromUrl("http://example.com/gtfs.zip");
 ```
 
+Optionally, you can choose to download a GTFS zip file only if it has changed since the last retrieval. This is useful when trying to automate GTFS retrievals that need to be stored within a database, without constantly rewriting the same data each time.
+The following Http Headers are used:
+
+ - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+ - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
+ - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+
+Most agencies provide a Last-Modified header, but if it's not present, ETag is the best route to go. If for some reason ETag is also not provided, it will just continue normally as if you were to use the original GtfsArchive::createFromUrl() method.
+
+```php
+ $gtfsArchive = GtfsArchive::createFromUrlIfModified(
+    "http://example.com/gtfs.zip",
+    "Wed, 10 Jun 2020 15:56:14 GMT",
+    "99fa-5a7bce236c526"
+ );
+```
+
+If you don't have an ETag or Last-Modified value to begin with, simply leave them out and the method will retrieve them for you.
+
+```php
+ if ($gtfsArchive = GtfsArchive::createFromUrlIfModified("http://example.com/gtfs.zip") {
+    // Get Methods return null if GTFS Url does not contain the specified Header: ETag, Last-Modified.
+    $lastModified = $gtfsArchive->getLastModified(); // Wed, 10 Jun 2020 15:56:14 GMT | null
+    $eTag         = $gtfsArchive->getETag(); // "99fa-5a7bce236c526" | null
+    
+    // You can get the Last-Modified datetime PHP Object (Useful for storing in databases) by doing the following:
+    $datetime = $gtfsArchive->getLastModifiedDateTime() // DateTime Object | null
+    
+    // Or Convert it back to a String using the standard Last-Modified HTTP header format.
+    if ($datetime) {
+      $lastModified = GtfsArchive::getLastModifiedFromDateTime($datetime); // Wed, 10 Jun 2020 15:56:14 GMT
+    }  
+ }
+ 
+```
+
+
 Files are extracted to a temporary directory (/tmp/gtfs/), and cleaned up when the GtfsArchive object is destructed.
 You can call `$gtfsArchive->deleteUncompressedFiles()` to manually remove the uncompressed files. 
 

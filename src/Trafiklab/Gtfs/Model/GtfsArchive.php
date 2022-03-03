@@ -43,6 +43,13 @@ class GtfsArchive
 
     private $fileRoot;
 
+    /** @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified */
+    private const LAST_MODIFIED_FORMAT = "D, d M Y H:i:s e";
+    /** @var null|string $archiveLastModified */
+    private static $archiveLastModified = null;
+    /** @var null|string $archiveETag */
+    private static $archiveETag = null;
+
     private function __construct(string $fileRoot)
     {
         $this->fileRoot = $fileRoot;
@@ -61,6 +68,114 @@ class GtfsArchive
         $downloadedArchive = self::downloadFile($url);
         $fileRoot = self::extractFiles($downloadedArchive, true);
         return new GtfsArchive($fileRoot);
+    }
+
+    /**
+     * Creates the context and returns it for use in file_get_contents
+     * Adds the If-Modified-Since header to check if the GTFS has been modified.
+     */
+    private static function createRequestContext(?\DateTime $lastModified = null)
+    {
+        self::$archiveLastModified = $lastModified !== null ? self::getLastModifiedFromDateTime($lastModified) : '';
+        return stream_context_create([
+            'http' => [
+                'header' => "If-Modified-Since: " . self::$archiveLastModified,
+                'method'        => 'GET',
+                'ignore_errors' => true
+            ],
+        ]);
+    }
+
+    /**
+     * Check if the temp directory exists, if not create it.
+     */
+    private static function makeTempDir()
+    {
+        if (!file_exists(self::TEMP_ROOT)) {
+            mkdir(self::TEMP_ROOT, 0777, true);
+        }
+    }
+
+    /**
+     * Only create a new Archive if it has been modified since the last PULL
+     * We delete the Zip archive after each cycle as this is meant to constantly check headers.
+     * @param string $url
+     * @param \DateTime|null $lastModified
+     * @param string|null $eTag
+     * @return GtfsArchive|null
+     * @throws Exception
+     */
+    public static function createFromUrlIfModified(
+        string $url,
+        ?\DateTime $lastModified = null,
+        ?string $eTag = null
+    ): ?GtfsArchive {
+        $temp_file = self::TEMP_ROOT . md5($url) . ".zip";
+        if (!file_exists($temp_file)) {
+            try {
+                /** Create the Request Context (Returns Stream Context) */
+                $context = self::createRequestContext($lastModified);
+                /** Make the temp directory if it doesn't exist. */
+                self::makeTempDir();
+
+                /** Download the zip file if it's been modified, or exists. */
+                file_put_contents($temp_file, file_get_contents($url, false, $context));
+
+                /**
+                 * @var array $http_response_header materializes out of thin air unfortunately
+                 * Parse the headers so we can retrieve what we need.
+                 */
+                $responseHeaders = self::parseHeaders($http_response_header);
+
+                /** @var integer $statusCode
+                 * Track the Status code to determine if the file has changed, or exists.
+                 */
+                $statusCode = $responseHeaders['status'];
+                switch ($statusCode) {
+                    case 200:
+                        /**
+                         * If the Status Code is 200, that means the file has been modified or it is a new GTFS Source.
+                         * Track the eTag and Last-Modified headers if they exist.
+                         */
+                        self::$archiveLastModified = $responseHeaders['last-modified'] ?? null;
+                        self::$archiveETag = $responseHeaders['etag'] ?? null;
+
+                        /** If no last-modified date is present, and Etag is present and matches, skip as it's not modified
+                         *  If it returns 200 and LastModified is not null, that means that the Last-Modified date has changed.
+                         *  Should always respect the Last-Modified date over eTag if there's a mismatch.
+                         */
+                        if (
+                            ($lastModified === null) &&
+                            ($eTag !== null && self::$archiveETag !== null && $eTag == self::$archiveETag)
+                        ) {
+                            return null;
+                        } else {
+                            /**
+                             * Last-Modified Date wasn't present, and eTag is not present or didn't match.
+                             * Extract files and return the GtfsArchive.
+                             */
+                            $fileRoot = self::extractFiles($temp_file, true);
+                            return new GtfsArchive($fileRoot);
+                        }
+                    case 304:
+                        /**  304 = NOT_MODIFIED (This file hasn't changed since the last pull) */
+                        self::$archiveETag = $eTag;
+                        break;
+                    default:
+                        /** Status Code returned a 400 error or similar meaning the URL is invalid or down. */
+                        throw new Exception("Could not open the GTFS archive, Status Code: {$statusCode}");
+                }
+            } catch (Exception $exception) {
+                throw new Exception(
+                    "There was an issue downloading the GTFS from the requested URL: {$url}, Error: " .
+                    $exception->getMessage()
+                );
+            } finally {
+                /** Clean up - Delete the Downloaded Zip if it exists. */
+                self::deleteArchive($temp_file);
+            }
+        }
+        return null;
     }
 
     /**
@@ -96,6 +211,9 @@ class GtfsArchive
         return $temp_file;
     }
 
+    /**
+     * @throws Exception
+     */
     private static function extractFiles(string $archiveFilePath, bool $deleteArchive = false)
     {
         // Load the zip file.
@@ -109,7 +227,7 @@ class GtfsArchive
         $zip->close();
 
         if ($deleteArchive) {
-            unlink($archiveFilePath);
+            self::deleteArchive($archiveFilePath);
         }
 
         return $extractionPath;
@@ -224,11 +342,86 @@ class GtfsArchive
         rmdir($this->fileRoot);
     }
 
+    private static function deleteArchive(string $archiveFilePath)
+    {
+        if (file_exists($archiveFilePath)) {
+            unlink($archiveFilePath);
+        }
+    }
+
     private function loadGtfsFileThroughCache(string $method, string $file, string $class)
     {
         if ($this->getCachedResult($method) == null) {
             $this->setCachedResult($method, new $class($this, $this->fileRoot . $file));
         }
         return $this->getCachedResult($method);
+    }
+
+    /**
+     * Parse file_get_contents Response headers into an array
+     * Primarily to retrieve the Status Code, Last-Modified, and ETag headers.
+     * @param array $headers
+     * @return array
+     */
+    private static function parseHeaders(array $headers): array
+    {
+        $headersArray = [];
+        foreach($headers as $k => $v) {
+            $t = explode(':', $v, 2);
+            if (isset($t[1])) {
+                $headersArray[ strtolower(trim($t[0])) ] = trim( $t[1] );
+            }
+            else {
+                $headersArray[] = $v;
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $v, $out) )
+                    $headersArray['status'] = intval($out[1]);
+            }
+        }
+        return $headersArray;
+    }
+
+    /**
+     * Return the DateTime Object for the Last Modified Date
+     * Useful for storing in databases, etc.
+     * @return \DateTime|null
+     * @throws Exception
+     */
+    public function getLastModifiedDateTime(): ?\DateTime
+    {
+        $datetime = (
+            new \DateTime(
+                self::$archiveLastModified,
+                new \DateTimeZone('GMT')
+            )
+        );
+        return self::$archiveLastModified !== null ? $datetime : null;
+    }
+
+    /**
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+     * @param \DateTime $dateTime
+     * @return string
+     */
+    public static function getLastModifiedFromDateTime(\DateTime $dateTime): string
+    {
+        return $dateTime
+            ->setTimezone(new \DateTimeZone('GMT'))
+            ->format(self::LAST_MODIFIED_FORMAT);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getArchiveLastModified(): ?string
+    {
+        return self::$archiveLastModified ?? null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getArchiveETag(): ?string
+    {
+        return self::$archiveETag ?? null;
     }
 }
