@@ -34,7 +34,7 @@ class StopTime
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = $value;
+            $this->$variable = !empty($value) ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -204,14 +204,14 @@ class StopTime
 
     /**
      * Indicates whether a rider can board the transit vehicle at any point along the vehicle’s travel path. The path is described by shapes.txt, from this stop_time to the next stop_time in the trip’s stop_sequence. Valid options are:
-     * 
+     *
      * 0 - Continuous stopping pickup.
      * 1 or empty - No continuous stopping pickup.
      * 2 - Must phone an agency to arrange continuous pickup.
      * 3 - Must coordinate with a driver to arrange continuous stopping pickup.
-     * 
+     *
      * The continuous pickup behavior indicated in stop_times.txt overrides any behavior defined in routes.txt.
-     * 
+     *
      * @return int|null
      */
     public function getContinuousPickup(): ?int
@@ -221,12 +221,12 @@ class StopTime
 
     /**
      * Indicates whether a rider can alight from the transit vehicle at any point along the vehicle’s travel path as described by shapes.txt, from this stop_time to the next stop_time in the trip’s stop_sequence.
-     * 
+     *
      * 0 - Continuous stopping drop off.
      * 1 or empty - No continuous stopping drop off.
      * 2 - Must phone an agency to arrange continuous drop off.
      * 3 - Must coordinate with a driver to arrange continuous stopping drop off.
-     * 
+     *
      * The continuous drop-off behavior indicated in stop_times.txt overrides any behavior defined in routes.txt.
      * @return int|null
      */

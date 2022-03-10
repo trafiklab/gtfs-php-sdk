@@ -34,7 +34,7 @@ class Route
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = $value;
+            $this->$variable = !empty($value) ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -198,7 +198,7 @@ class Route
      * 1 or empty - No continuous stopping drop-off.
      * 2 - Must phone an agency to arrange continuous stopping drop-off.
      * 3 - Must coordinate with a driver to arrange continuous stopping drop-off.
-     * 
+     *
      * The default continuous drop-off behavior defined in routes.txt can be overridden in stop_times.txt.
      *
      * @return int | null
