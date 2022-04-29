@@ -26,7 +26,7 @@ class Transfer
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = !empty($value) ? $value : null;
+            $this->$variable = isset($value) && $value !== '' ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -76,7 +76,7 @@ class Transfer
      * routes at the specified stops. The min_transfer_time must be sufficient to permit a typical rider to move
      * between the two stops, as well as some buffer time to allow for schedule variance on each route.
      *
-     * @return int
+     * @return int|null
      */
     public function getMinTransferTime(): ?int
     {

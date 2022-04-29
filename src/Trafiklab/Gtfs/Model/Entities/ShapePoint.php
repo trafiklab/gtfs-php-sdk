@@ -27,7 +27,7 @@ class ShapePoint
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = !empty($value) ? $value : null;
+            $this->$variable = isset($value) && $value !== '' ? $value : null;
         }
         $this->archive = $archive;
     }

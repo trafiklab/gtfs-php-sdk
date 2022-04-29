@@ -31,7 +31,7 @@ class Agency
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = !empty($value) ? $value : null;
+            $this->$variable = isset($value) && $value !== '' ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -75,7 +75,7 @@ class Agency
      *    Contains the timezone where the transit agency is located. If multiple agencies are specified in the feed,
      *    each must have the same agency_timezone.
      *
-     * @return null|string
+     * @return string | null
      */
     public function getAgencyTimezone(): ?string
     {
@@ -86,7 +86,7 @@ class Agency
      * Specifies the primary language used by this transit agency. This setting helps GTFS consumers choose
      * capitalization rules and other language-specific settings for the dataset.
      *
-     * @return null|string
+     * @return string | null
      */
     public function getAgencyLang(): ?string
     {
@@ -99,7 +99,7 @@ class Agency
      *    marks to group the digits of the number. Dialable text, such as TriMet's 503-238-RIDE, is permitted, but the
      *    field must not contain any other descriptive text.
      *
-     * @return null|string
+     * @return string | null
      */
     public function getAgencyPhone(): ?string
     {
@@ -110,7 +110,7 @@ class Agency
      *    Specifies the URL of a web page where a rider can purchase tickets or other fare instruments for the agency
      *    online.
      *
-     * @return null|string
+     * @return string | null
      */
     public function getAgencyFareUrl(): ?string
     {
@@ -122,7 +122,7 @@ class Agency
      * address needs to be a direct contact point where transit riders can reach a customer service representative at
      * the agency.
      *
-     * @return null|string
+     * @return string | null
      */
     public function getAgencyEmail(): ?string
     {
