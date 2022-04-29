@@ -48,8 +48,14 @@ class GtfsShapesFile
 
         $shapePoints = $this->getShapePoints();
         $i = BinarySearchUtil::findIndexOfFirstFieldOccurrence($shapePoints, 'getShapeId', $shapeId);
+
+        // If the shape id is not present
+        if ($i == -1) {
+            return [];
+        }
+
         $result = [];
-        while ($shapePoints[$i]->getShapeId() == $shapeId) {
+        while ($i < count($shapePoints) && $shapePoints[$i]->getShapeId() == $shapeId) {
             $result[] = $shapePoints[$i];
             $i++;
         }
