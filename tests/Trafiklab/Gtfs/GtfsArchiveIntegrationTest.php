@@ -214,11 +214,14 @@ class GtfsArchiveIntegrationTest extends TestCase
     public function testGetAgency()
     {
         $agencies = $this->gtfsArchive->getAgencyFile()->getAgencies();
-        self::assertEquals(1, count($agencies));
+        self::assertEquals(2, count($agencies));
         self::assertEquals(88100000000001375, $agencies[0]->getAgencyId());
         self::assertEquals("Kalmar Länstrafik", $agencies[0]->getAgencyName());
         self::assertEquals("https://www.resrobot.se/", $agencies[0]->getAgencyUrl());
         self::assertEquals("Europe/Stockholm", $agencies[0]->getAgencyTimezone());
         self::assertEquals("sv", $agencies[0]->getAgencyLang());
+        self::assertNull($agencies[0]->getAgencyPhone(), 'Agency Phone is not null!');
+        self::assertNull($agencies[1]->getAgencyEmail(), 'Agency Email is not null!');
+        self::assertEquals('000-000-0000', $agencies[1]->getAgencyPhone(), 'Agency Phone is not equal to 000-000-0000');
     }
 }
