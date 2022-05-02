@@ -31,7 +31,7 @@ class FeedInfo
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = $value;
+            $this->$variable = isset($value) && $value !== '' ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -106,7 +106,7 @@ class FeedInfo
      * display this value to help dataset publishers determine whether the latest version of their dataset has been
      * incorporated.
      *
-     * @return string
+     * @return null|string
      */
     public function getFeedVersion(): ?string
     {
@@ -118,7 +118,7 @@ class FeedInfo
      * feed_contact_email field provides a technical contact for GTFS-consuming applications. To provide customer
      * service contact information, use the fields in agency.txt.
      *
-     * @return string
+     * @return null|string
      */
     public function getFeedContactEmail(): ?string
     {
@@ -130,7 +130,7 @@ class FeedInfo
      * dataset and data publishing practices. The feed_contact_url field provides a technical contact for
      * GTFS-consuming applications. To provide customer service contact information, use the fields in agency.txt.
      *
-     * @return string
+     * @return null|string
      */
     public function getFeedContactUrl(): ?string
     {

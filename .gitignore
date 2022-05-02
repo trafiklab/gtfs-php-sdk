@@ -5,3 +5,4 @@ composer.lock
 .testkeys
 .cache
 .idea
+.DS_Store
