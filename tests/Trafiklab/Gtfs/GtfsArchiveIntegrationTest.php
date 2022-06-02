@@ -224,4 +224,33 @@ class GtfsArchiveIntegrationTest extends TestCase
         self::assertNull($agencies[1]->getAgencyEmail(), 'Agency Email is not null!');
         self::assertEquals('000-000-0000', $agencies[1]->getAgencyPhone(), 'Agency Phone is not equal to 000-000-0000');
     }
+
+    /**
+     * Test the Directions GTFSArchive.
+     * @return void
+     */
+    public function testGetDirections()
+    {
+        /** Directions file should be retrieved. */
+        $directions = $this->gtfsArchive->getDirectionsFile()->getDirections();
+        /** Test correct number of directions parsed. */
+        self::assertEquals(17, count($directions), 'Parsed incorrect number of Directions.');
+        /** Test Types */
+        self::assertIsString($directions[0]->getRouteId(), 'route_id should be a string.');
+        self::assertIsString($directions[0]->getDirection(), 'direction should be a string.');
+        self::assertIsNumeric($directions[0]->getDirectionId(), 'direction_id should be numeric (0,1).');
+        /** Test Getters/Validity */
+        self::assertEquals(0, $directions[16]->getDirectionId(), 'direction_id should be 0.');
+        self::assertEquals('North', $directions[0]->getDirection(), 'Should Equal North.');
+        self::assertEquals('1', $directions[0]->getRouteId(), 'Should equal 1');
+        self::assertEquals('Northeast', $directions[4]->getDirection(), 'Should Equal Northeast.');
+        self::assertEquals('A Loop', $directions[15]->getDirection(), 'Should Equal A Loop.');
+        /** Test Abbreviations method. */
+        self::assertEquals('N', $directions[0]->getCardinalDirectionAbrv(), 'Should Equal N');
+        self::assertEquals('NB', $directions[0]->getCardinalDirectionAbrv(true), 'Should Equal NB');
+        self::assertEquals('SB', $directions[6]->getCardinalDirectionAbrv(true), 'Should Equal SB');
+        /** Test DirectionBound method (Inbound/Outbound) */
+        self::assertEquals("Inbound", $directions[0]->getBoundDirection(), 'Should be equal to Inbound.');
+        self::assertEquals("Outbound", $directions[16]->getBoundDirection(), 'Should be equal to Outbound.');
+    }
 }
