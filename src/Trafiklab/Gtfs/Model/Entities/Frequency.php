@@ -27,7 +27,7 @@ class Frequency
     function __construct(GtfsArchive $archive, array $data)
     {
         foreach ($data as $variable => $value) {
-            $this->$variable = $value;
+            $this->$variable = isset($value) && $value !== '' ? $value : null;
         }
         $this->archive = $archive;
     }
@@ -63,8 +63,8 @@ class Frequency
     }
 
     /**
-     * Time, in seconds, between departures from the same stop (headway) for the trip, during the time 
-     * interval specified by start_time and end_time. Multiple headways for the same trip are allowed, 
+     * Time, in seconds, between departures from the same stop (headway) for the trip, during the time
+     * interval specified by start_time and end_time. Multiple headways for the same trip are allowed,
      * but may not overlap. New headways may start at the exact time the previous headway ends.
      *
      * @return int
@@ -76,15 +76,15 @@ class Frequency
 
     /**
      * Indicates the type of service for a trip. See the file description for more information. Valid options are:
-     * 
+     *
      * 0 or empty - Frequency-based trips.
-     * 1 - Schedule-based trips with the exact same headway throughout the day. In this case the end_time value 
-     *     must be greater than the last desired trip start_time but less than the last desired trip 
+     * 1 - Schedule-based trips with the exact same headway throughout the day. In this case the end_time value
+     *     must be greater than the last desired trip start_time but less than the last desired trip
      *     start_time + headway_secs.
      *
-     * @return int
+     * @return int|null
      */
-    public function getExactTimes(): int
+    public function getExactTimes(): ?int
     {
         return $this->exact_times;
     }

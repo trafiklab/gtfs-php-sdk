@@ -5,6 +5,7 @@ namespace Trafiklab\Gtfs;
 use DateTime;
 use PHPUnit\Framework\TestCase;
 use Trafiklab\Gtfs\Model\GtfsArchive;
+use Trafiklab\Gtfs\Util\Internal\BinarySearchUtil;
 
 class GtfsArchiveIntegrationTest extends TestCase
 {
@@ -16,7 +17,7 @@ class GtfsArchiveIntegrationTest extends TestCase
     public function __construct()
     {
         parent::__construct();
-        $this->gtfsArchive = GtfsArchive::createFromPath("./tests/Resources/Gtfs/klt.zip");
+        $this->gtfsArchive = GtfsArchive::createFromPath("./tests/Resources/Gtfs/minified-test-feed.zip");
     }
 
     function __destruct()
@@ -41,55 +42,49 @@ class GtfsArchiveIntegrationTest extends TestCase
 
     public function testGetRoutes()
     {
-        self::assertEquals(337, count($this->gtfsArchive->getRoutesFile()->getRoutes()));
+        self::assertEquals(2, count($this->gtfsArchive->getRoutesFile()->getRoutes()));
     }
 
     public function testGetRoute()
     {
-        $route = $this->gtfsArchive->getRoutesFile()->getRoute('9011008095600000');
+        $route = $this->gtfsArchive->getRoutesFile()->getRoute('9011008842200000');
 
-        self::assertEquals('9011008095600000', $route->getRouteId());
+        self::assertEquals('9011008842200000', $route->getRouteId());
         self::assertEquals('88100000000001375', $route->getAgencyId());
-        self::assertEquals('SJ', $route->getRouteShortName());
-        self::assertEquals('SJ Regional', $route->getRouteLongName());
-        self::assertEquals('2', $route->getRouteType());
+        self::assertEquals('8422', $route->getRouteShortName());
+        self::assertEquals('Närtrafik 2', $route->getRouteLongName());
+        self::assertEquals('0', $route->getRouteType());
     }
 
     public function testGetTrips()
     {
-        self::assertEquals(11967, count($this->gtfsArchive->getTripsFile()->getTrips()));
+        self::assertEquals(2, count($this->gtfsArchive->getTripsFile()->getTrips()));
     }
 
     public function testGetTrip()
     {
-        $trip = $this->gtfsArchive->getTripsFile()->getTrip('88100000070093268');
+        $trip = $this->gtfsArchive->getTripsFile()->getTrip('88100000084251548');
 
-        self::assertEquals('9011008003900000', $trip->getRouteId());
-        self::assertEquals('13', $trip->getServiceId());
-        self::assertEquals('88100000070093268', $trip->getTripId());
+        self::assertEquals('9011008842200000', $trip->getRouteId());
+        self::assertEquals('2', $trip->getServiceId());
+        self::assertEquals('88100000084251548', $trip->getTripId());
         self::assertEquals('', $trip->getTripHeadsign());
         self::assertEquals('0', $trip->getDirectionId());
-        self::assertEquals('10', $trip->getShapeId());
+        self::assertEquals('2', $trip->getShapeId());
     }
 
     public function testGetStopTimes()
     {
-        self::assertEquals(248296, count($this->gtfsArchive->getStopTimesFile()->getStopTimes()));
+        self::assertEquals(92, count($this->gtfsArchive->getStopTimesFile()->getStopTimes()));
     }
 
     public function testGetShapePoints()
     {
-        if (getenv("LIMIT_MEMORY_USAGE") != null) {
-            $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
-        }
-        self::assertEquals(2172367, count($this->gtfsArchive->getShapesFile()->getShapePoints()));
+        self::assertEquals(2474, count($this->gtfsArchive->getShapesFile()->getShapePoints()));
     }
 
     public function testGetShape()
     {
-        if (getenv("LIMIT_MEMORY_USAGE") != null) {
-            $this->markTestSkipped('Skipping test with high memory usage - unset LIMIT_MEMORY_USAGE environment variable to run this test.');
-        }
         $shape = $this->gtfsArchive->getShapesFile()->getShape(1);
 
         self::assertEquals(1236, count($shape));
@@ -107,17 +102,68 @@ class GtfsArchiveIntegrationTest extends TestCase
         }
 
         $shape = $this->gtfsArchive->getShapesFile()->getShape(2185);
-        self::assertEquals(1191, count($shape));
-        for ($i = 0; $i < count($shape); $i++) {
-            self::assertEquals(2185, $shape[$i]->getShapeId());
-            self::assertEquals($i + 1, $shape[$i]->getShapePtSequence());
-        }
+        self::assertEquals(0, count($shape));
+    }
+
+    public function testGetShape_shapeIdPresentAtStart()
+    {
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(1);
+        self::assertEquals(1236, count($shape));
+
+        // Additional verification of inner working, this should be in a separate test
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 1);
+        self::assertEquals(0, $shapeStartId);
+
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 2);
+        self::assertEquals(1236, $shapeStartId);
+    }
+
+    public function testGetShape_shapeIdPresentInMiddle()
+    {
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(4);
+        self::assertEquals(1, count($shape));
+
+        // Additional verification of inner working, this should be in a separate test
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 4);
+        self::assertEquals(2472, $shapeStartId);
+    }
+
+    public function testGetShape_shapeIdPresentAtEnd()
+    {
+        // Additional verification of inner working, this should be in a separate test
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 6);
+        self::assertEquals(2473, $shapeStartId);
+
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(6);
+        self::assertEquals(1, count($shape));
+    }
+
+    public function testGetShape_shapeIdNotPresent()
+    {
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(3);
+        self::assertEquals(0, count($shape));
+
+        $shape = $this->gtfsArchive->getShapesFile()->getShape(5);
+        self::assertEquals(0, count($shape));
+
+        // Additional verification of inner working, this should be in a separate test
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 3);
+        self::assertEquals(-1, $shapeStartId);
+
+        $shapeStartId = BinarySearchUtil::findIndexOfFirstFieldOccurrence(
+            $this->gtfsArchive->getShapesFile()->getShapePoints(), 'getShapeId', 5);
+        self::assertEquals(-1, $shapeStartId);
     }
 
     public function testGetCalendar()
     {
         $calendar = $this->gtfsArchive->getCalendarFile()->getCalendarEntries();
-        self::assertEquals(290, count($calendar));
+        self::assertEquals(2, count($calendar));
         self::assertEquals(1, $calendar[0]->getServiceId());
         self::assertEquals(DateTime::createFromFormat("Ymd", "20190517"), $calendar[0]->getStartDate());
         self::assertEquals(DateTime::createFromFormat("Ymd", "20190614"), $calendar[0]->getEndDate());
@@ -132,23 +178,23 @@ class GtfsArchiveIntegrationTest extends TestCase
 
     public function testGetCalendarDates()
     {
-        self::assertEquals(14965, count($this->gtfsArchive->getCalendarDatesFile()->getCalendarDates()));
+        self::assertEquals(24, count($this->gtfsArchive->getCalendarDatesFile()->getCalendarDates()));
     }
 
     public function testGetCalendarDatesForService()
     {
-        $dates = $this->gtfsArchive->getCalendarDatesFile()->getCalendarDatesForService(5);
-        self::assertEquals(17, count($dates));
+        $dates = $this->gtfsArchive->getCalendarDatesFile()->getCalendarDatesForService(2);
+        self::assertEquals(5, count($dates));
 
-        self::assertEquals(5, $dates[0]->getServiceId());
-        self::assertEquals(DateTime::createFromFormat("Ymd", 20190517), $dates[0]->getDate());
+        self::assertEquals(2, $dates[0]->getServiceId());
+        self::assertEquals(DateTime::createFromFormat("Ymd", 20190518), $dates[0]->getDate());
         self::assertEquals(1, $dates[0]->getExceptionType());
     }
 
     public function testGetTransfers()
     {
         $transfers = $this->gtfsArchive->getTransfersFile()->getTransfers();
-        self::assertEquals(3476, count($transfers));
+        self::assertEquals(9, count($transfers));
         self::assertEquals("9021008001009000", $transfers[0]->getFromStopId());
         self::assertEquals("9021008001009000", $transfers[0]->getToStopId());
         self::assertEquals(2, $transfers[0]->getTransferType());
@@ -168,11 +214,14 @@ class GtfsArchiveIntegrationTest extends TestCase
     public function testGetAgency()
     {
         $agencies = $this->gtfsArchive->getAgencyFile()->getAgencies();
-        self::assertEquals(1, count($agencies));
+        self::assertEquals(2, count($agencies));
         self::assertEquals(88100000000001375, $agencies[0]->getAgencyId());
         self::assertEquals("Kalmar Länstrafik", $agencies[0]->getAgencyName());
         self::assertEquals("https://www.resrobot.se/", $agencies[0]->getAgencyUrl());
         self::assertEquals("Europe/Stockholm", $agencies[0]->getAgencyTimezone());
         self::assertEquals("sv", $agencies[0]->getAgencyLang());
+        self::assertNull($agencies[0]->getAgencyPhone(), 'Agency Phone is not null!');
+        self::assertNull($agencies[1]->getAgencyEmail(), 'Agency Email is not null!');
+        self::assertEquals('000-000-0000', $agencies[1]->getAgencyPhone(), 'Agency Phone is not equal to 000-000-0000');
     }
 }
