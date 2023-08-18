@@ -46,7 +46,7 @@ class Agency
      *
      * @return string
      */
-    public function getAgencyId(): string
+    public function getAgencyId(): ?string
     {
         return $this->agency_id;
     }
