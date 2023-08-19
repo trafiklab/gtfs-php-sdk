@@ -8,6 +8,7 @@ use Exception;
 use Trafiklab\Gtfs\Model\Files\GtfsAgencyFile;
 use Trafiklab\Gtfs\Model\Files\GtfsCalendarDatesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsCalendarFile;
+use Trafiklab\Gtfs\Model\Files\GtfsDirectionsFile;
 use Trafiklab\Gtfs\Model\Files\GtfsFeedInfoFile;
 use Trafiklab\Gtfs\Model\Files\GtfsFrequenciesFile;
 use Trafiklab\Gtfs\Model\Files\GtfsRoutesFile;
@@ -38,6 +39,7 @@ class GtfsArchive
     private const PATHWAYS_TXT = "pathways.txt"; // Unsupported at this moment
     private const LEVELS_TXT = "levels.txt"; // Unsupported at this moment
     private const FEED_INFO_TXT = "feed_info.txt";
+    private const DIRECTIONS_TXT = "directions.txt"; // Experimental GTFS+ feed.
 
     private const TEMP_ROOT = "/tmp/gtfs/";
 
@@ -319,6 +321,13 @@ class GtfsArchive
     public function getFrequenciesFile(): GtfsFrequenciesFile
     {
         return $this->loadGtfsFileThroughCache(__METHOD__, self::FREQUENCIES_TXT, GtfsFrequenciesFile::class);
+    }
+    /**
+     * @return GtfsDirectionsFile|null
+     */
+    public function getDirectionsFile(): ?GtfsDirectionsFile
+    {
+        return $this->loadGtfsFileThroughCache(__METHOD__, self::DIRECTIONS_TXT, GtfsDirectionsFile::class);
     }
 
     /**
