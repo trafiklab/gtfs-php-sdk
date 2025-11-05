@@ -30,7 +30,7 @@ class GtfsParserUtil
 
         $handle = self::openFile($csvPath);
         if ($handle) {
-            while (($row = fgetcsv($handle)) !== false) {
+            while (($row = fgetcsv($handle, null, ',', '"', '\\')) !== false) {
                 $row = array_map('trim', $row);
                 // Read the header row
                 if (empty($fieldNames)) {
